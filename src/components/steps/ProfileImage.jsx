@@ -1,5 +1,10 @@
-import React from "react";
+export default function ProfileImage() {
+  return (
+    <div>
+      <label>Date of birth</label>
+      <input type="date" />
 
-export const ProfileImage = () => {
-  return <div>ProfileImage</div>;
-};
+      <div className="mt-4 border p-4 text-center">Browse or Drop Image</div>
+    </div>
+  );
+}
