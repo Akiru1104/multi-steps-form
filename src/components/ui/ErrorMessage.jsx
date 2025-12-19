@@ -1,12 +1,5 @@
-import React from "react";
-
 export const ErrorMessage = ({ message }) => {
   if (!message) return null;
-
-  const errorMessageStyle = {
-    color: "red",
-    fontSize: "12px",
-  };
-
-  return <div style={errorMessageStyle}>{message}</div>;
+  return <p className="text-red-500 text-xs mt-1">{message}</p>;
 };
+1;

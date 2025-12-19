@@ -1,8 +1,9 @@
-export default function Success() {
+export const Success = () => {
   return (
-    <div className="text-center">
-      <h2>🎉 Success!</h2>
-      <p>Your account has been created.</p>
+    <div className="text-start">
+      <img className="h-[60] w-[60]" src="Logo.png" alt="" />
+      <div>You're All Set! 🔥 </div>
+      <div>We're received your submission.</div>
     </div>
   );
-}
+};

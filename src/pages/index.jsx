@@ -1,61 +1,57 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 
-import { Header } from "../components/layer/Header";
 import {
   ContactInfo,
   PrivateInfo,
-  ProfileImage,
+  ProfileInfo,
   Success,
-} from "../components/steps";
+} from "@/components/steps";
 
-export default function Home() {
-  const [step, setStep] = useState(1);
+import { Footer } from "@/components/layer/Footer";
+import { initialValues } from "@/constants/initial";
 
+const Home = () => {
+  const [step, setStep] = useState(0);
+  const [formValues, setFormValues] = useState(initialValues);
+  const [formErrors, setFormErrors] = useState(initialValues);
+  const totalSteps = 4;
+  const handleClick = () => {
+    if (step < totalSteps - 1) {
+      setStep(step + 1);
+    }
+  };
+  const handlePrev = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
+
+  const handleChange = (event) => {
+    const { value, name } = event.target;
+
+    setFormErrors((previous) => ({ ...previous, [name]: "" }));
+    setFormValues((previous) => ({ ...previous, [name]: value }));
+  };
+  const Container = [ContactInfo, PrivateInfo, ProfileInfo, Success][step];
   return (
-    <div className="min-h-screen bg-neutral-100 flex justify-center items-center">
-      <div className="w-full max-w-xl bg-white rounded-xl p-6 shadow">
-        <Header />
-
-        <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div
-              key="1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <ContactInfo />
-              <button onClick={() => setStep(2)}>Continue 1/3 →</button>
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div
-              key="2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <PrivateInfo />
-              <button onClick={() => setStep(1)}>← Back</button>
-              <button onClick={() => setStep(3)}>Continue 2/3 →</button>
-            </motion.div>
-          )}
-
-          {step === 3 && (
-            <motion.div
-              key="3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <ProfileImage />
-              <button onClick={() => setStep(2)}>← Back</button>
-              <button onClick={() => setStep(4)}>Continue 3/3 →</button>
-            </motion.div>
-          )}
-
-          {step === 4 && <Success />}
-        </AnimatePresence>
+    <div className="bg-gray-100 w-screen flex justify-center items-center h-screen">
+      <div className="bg-white w-120 drop-shadow-md rounded-xl p-8 flex flex-col gap-7 ">
+        <Container
+          handleChange={handleChange}
+          formValues={formValues}
+          formErrors={formErrors}
+          setFormErrors={setFormErrors}
+        />
+        {step !== totalSteps - 1 && (
+          <Footer
+            handleClick={handleClick}
+            handlePrev={handlePrev}
+            totalSteps={totalSteps}
+            step={step}
+          />
+        )}
       </div>
     </div>
   );
-}
+};
+export default Home;
