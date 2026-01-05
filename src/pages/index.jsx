@@ -9,6 +9,7 @@ import {
 
 import StepIndicator from "@/components/steps/StepIndicator";
 import { initialValues } from "@/constants/initial";
+import { Footer } from "@/components/layer/Footer";
 const Home = () => {
   //STEP VALUE
   const [step, setStep] = useState(0);
@@ -105,7 +106,8 @@ const Home = () => {
   const handleDrop = (e) => {
     e.preventDefault();
 
-    const uploadedImage = Array.from(event.dataTransfer.files).at(0);
+    const uploadedImage = Array.from(e.dataTransfer.files).at(0);
+    if (!uploadedImage) return;
 
     handleUploadedImage(uploadedImage);
 
@@ -126,14 +128,15 @@ const Home = () => {
   return (
     <div className="bg-gray-100 w-screen flex justify-center items-center h-screen">
       <motion.div
-        className="bg-white w-120 drop-shadow-md rounded-xl p-8 flex flex-col gap-7 "
+        className="bg-white w-120 drop-shadow-md rounded-xl p-8 flex flex-col gap-7"
         key={step}
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -200 }}
-        transition={{ duration: 2 }}
+        transition={{ duration: 0.5 }}
       >
         <StepIndicator step={step} totalSteps={totalSteps} />
+
         <Container
           totalSteps={totalSteps}
           step={step}
@@ -159,6 +162,15 @@ const Home = () => {
           setFormValues={setFormValues}
           dataSaveRemove={dataSaveRemove}
         />
+
+        {step !== totalSteps - 1 && (
+          <Footer
+            step={step}
+            totalSteps={totalSteps}
+            handleClick={handleClick}
+            handlePrev={handlePrev}
+          />
+        )}
       </motion.div>
     </div>
   );

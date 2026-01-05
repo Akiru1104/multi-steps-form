@@ -71,7 +71,6 @@ export const ContactInfo = ({
           <ErrorMessage message={formErrors.username} />
         </div>
       </div>
-      <Footer onClick={handleSubmit} />
     </div>
   );
 };

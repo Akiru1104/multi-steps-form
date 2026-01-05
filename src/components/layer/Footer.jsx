@@ -1,29 +1,27 @@
-export const Footer = ({
-  handleClick,
-  handlePrev,
-  totalSteps,
-  step,
-  handleSubmit,
-}) => {
+export const Footer = ({ handleClick, handlePrev, totalSteps, step }) => {
+  const visibleSteps = totalSteps - 1;
+
   return (
-    <div className="flex gap-3 flex-row-reverse">
-      {" "}
-      {step > -2 && (
+    <div className="pt-4 flex items-center gap-3">
+      {step > 0 && step < visibleSteps && (
         <button
-          className="w-full h-[44] flex justify-center items-center px-3 py-[10] gap-2 rounded-md bg-[#121316] text-white cursor-pointer"
-          onClick={handleClick}
-        >
-          Continue {step + 1}/{totalSteps - 1}
-          <img src="Vector.png" alt="" className="" />
-        </button>
-      )}
-      {step > 0 && (
-        <button
-          className="w-50 h-[44] flex justify-center items-center px-3 py-[10] gap-2 rounded-md bg-[white] text-black cursor-pointer border-[#CBD5E1] border"
+          type="button"
+          className="h-[44] w-[128] px-6 rounded-md bg-white text-black border border-[#CBD5E1] flex items-center"
           onClick={handlePrev}
         >
-          <img src="./chevron_left.png" alt="vector" />
+          <img src="/chevron_left.png" alt="back" />
           Back
+        </button>
+      )}
+
+      {step < visibleSteps && (
+        <button
+          type="button"
+          className="h-[44px] w-full rounded-md bg-[#121316] text-white flex items-center justify-center gap-2"
+          onClick={handleClick}
+        >
+          Continue {step + 1}/{visibleSteps}
+          <img src="/Vector.png" alt="" />
         </button>
       )}
     </div>
