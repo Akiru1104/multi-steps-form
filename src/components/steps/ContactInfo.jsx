@@ -1,7 +1,5 @@
 import { Header } from "@/components/layer/Header";
-import { validateStepOne } from "@/utils/validators";
 import { ErrorMessage } from "../ui/ErrorMessage";
-import { Footer } from "../layer/Footer";
 export const ContactInfo = ({
   handleChange,
   formValues,

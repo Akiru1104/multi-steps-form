@@ -7,9 +7,7 @@ const StepIndicator = ({ step, totalSteps }) => {
         {Array.from({ length: visibleSteps }).map((_, index) => (
           <span
             key={index}
-            className={`rounded-full transition-all ${
-              index === step ? "bg-black w-2 h-2" : "bg-gray-300 w-2 h-2"
-            }`}
+            className={` ${index === step ? "bg-black" : "bg-gray-300"}`}
           />
         ))}
       </div>

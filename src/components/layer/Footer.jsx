@@ -17,7 +17,7 @@ export const Footer = ({ handleClick, handlePrev, totalSteps, step }) => {
       {step < visibleSteps && (
         <button
           type="button"
-          className="h-[44px] w-full rounded-md bg-[#121316] text-white flex items-center justify-center gap-2"
+          className="h-[44] w-full rounded-md bg-[#121316] text-white flex items-center justify-center gap-2"
           onClick={handleClick}
         >
           Continue {step + 1}/{visibleSteps}

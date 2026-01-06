@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+
 import {
   ContactInfo,
   PrivateInfo,
@@ -10,125 +11,156 @@ import {
 import StepIndicator from "@/components/steps/StepIndicator";
 import { initialValues } from "@/constants/initial";
 import { Footer } from "@/components/layer/Footer";
-const Home = () => {
-  //STEP VALUE
-  const [step, setStep] = useState(0);
 
-  //KEY VALUE
+import {
+  validateStepOne,
+  validateStepTwo,
+  validateStepThree,
+} from "@/utils/validators";
+
+const Home = () => {
+  // STEP
+  const [step, setStep] = useState(0);
+  const totalSteps = 4; // [0,1,2,3]
+
+  // FORM
   const [formValues, setFormValues] = useState(initialValues);
   const [formErrors, setFormErrors] = useState(initialValues);
-  // console.log(formValues);
-  //PHOTO DRAGGING
-  const [isDragging, setIsDragging] = useState(false);
 
-  // PHOTO STATE
-  const inputRef = useRef();
+  // IMAGE / DRAG
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  //SAVE FROM DATA
-  const dataSave = () => {
+  // SAVE / LOAD (localStorage)
+  const dataSave = (nextStep) => {
+    const { profile, ...rest } = formValues; // profile-г localStorage-д хадгалахгүй
     localStorage.setItem(
       "saveFromData",
-      JSON.stringify({ ...formValues, step: step + 1 })
+      JSON.stringify({ ...rest, step: nextStep })
     );
   };
 
-  //
-  const dataSaveRemove = () => {
-    localStorage.removeItem("saveFromData");
-  };
-
-  // sdasdasda
   const dataFromSave = () => {
     const value = localStorage.getItem("saveFromData");
     return value ? JSON.parse(value) : null;
   };
 
-  // PHOTO CLICK
+  const dataSaveRemove = () => {
+    localStorage.removeItem("saveFromData");
+  };
+
+  // IMAGE
   const handleBrowserClick = () => {
-    if (inputRef.current) {
-      inputRef.current.click();
-    }
+    if (inputRef.current) inputRef.current.click();
   };
 
   const handleUploadedImage = (file) => {
-    const imageUrl = URL.createObjectURL(file);
-    setImageUrl(imageUrl);
-    setFormValues((previous) => ({ ...previous, profile: imageUrl }));
-  };
-  const handleImageChange = (event) => {
-    const uploadedImage = Array.from(event.target.files).at(0);
-    // if (!uploadedImage) return;
+    if (!file) return;
 
-    const imageUrl = URL.createObjectURL(uploadedImage);
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
 
-    setImageUrl(imageUrl);
-
-    setFormValues((previous) => ({ ...previous, profile: imageUrl }));
+    // profile дээр FILE хадгалах нь зөв (submit хийхэд хэрэгтэй)
+    setFormValues((prev) => ({ ...prev, profile: file }));
+    setFormErrors((prev) => ({ ...prev, profile: "" }));
   };
 
-  //PHOTO CLEAR BUTTON
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    handleUploadedImage(file);
+  };
+
   const clearImage = () => {
-    inputRef.current.value = "";
+    if (inputRef.current) inputRef.current.value = "";
     setImageUrl("");
-    setFormValues((previous) => ({ ...previous, profile: "" }));
+    setFormValues((prev) => ({ ...prev, profile: null }));
   };
 
-  // STEP +
-  const totalSteps = 4;
-  const handleClick = () => {
-    if (step < totalSteps - 1) {
-      setStep(step + 1);
+  // INPUT CHANGE (text/date etc.)
+  const handleChange = (e) => {
+    const { name, value, type, files } = e.target;
+
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+
+    if (type === "file") {
+      const file = files?.[0];
+      if (!file) return;
+      handleUploadedImage(file);
+      return;
     }
+
+    setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  // STEP -
-  const handlePrev = () => {
-    if (step > 0) {
-      setStep(step - 1);
-    }
-  };
-
-  // INPUT VALUE
-  const handleChange = (event) => {
-    const { value, name } = event.target;
-
-    setFormErrors((previous) => ({ ...previous, [name]: "" }));
-    setFormValues((previous) => ({ ...previous, [name]: value }));
-  };
-
+  // DRAG & DROP
   const handleDragOver = (e) => {
     e.preventDefault();
-
     setIsDragging(true);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
 
-    const uploadedImage = Array.from(e.dataTransfer.files).at(0);
-    if (!uploadedImage) return;
-
-    handleUploadedImage(uploadedImage);
-
+    handleUploadedImage(file);
     setIsDragging(false);
   };
+
   const handleDragLeave = () => setIsDragging(false);
+
+  // NEXT (VALIDATION + SAVE)
+  const handleNext = () => {
+    let result = { errors: {}, isValid: true };
+
+    if (step === 0) result = validateStepOne(formValues);
+    if (step === 1) result = validateStepTwo(formValues);
+    if (step === 2) result = validateStepThree(formValues);
+
+    setFormErrors((prev) => ({ ...prev, ...result.errors }));
+
+    if (!result.isValid) return;
+
+    setStep((prev) => {
+      const next = Math.min(prev + 1, totalSteps - 1);
+      dataSave(next);
+      return next;
+    });
+  };
+
+  // BACK (SAVE)
+  const handlePrev = () => {
+    setStep((prev) => {
+      const back = Math.max(prev - 1, 0);
+      dataSave(back);
+      return back;
+    });
+  };
 
   const Container = [ContactInfo, PrivateInfo, ProfileInfo, Success][step];
 
+  // LOAD on mount
   useEffect(() => {
-    const valueFromLocal = dataFromSave();
-    if (valueFromLocal) {
-      setFormValues(valueFromLocal);
-      setStep(valueFromLocal.step);
+    const saved = dataFromSave();
+    if (saved) {
+      setFormValues((prev) => ({ ...prev, ...saved, profile: null }));
+      setStep(saved.step ?? 0);
     }
   }, []);
 
+  // CLEAR saved data on Success
+  useEffect(() => {
+    if (step === totalSteps - 1) {
+      dataSaveRemove();
+    }
+  }, [step]);
+
   return (
-    <div className="bg-gray-100 w-screen flex justify-center items-center h-screen">
+    <div className="bg-gray-100 w-screen flex justify-center items-center min-h-screen">
       <motion.div
-        className="bg-white w-120 drop-shadow-md rounded-xl p-8 flex flex-col gap-7"
+        className="bg-white w-120 drop-shadow-md rounded-xl p-8 flex flex-col"
         key={step}
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
@@ -136,7 +168,7 @@ const Home = () => {
         transition={{ duration: 0.5 }}
       >
         <StepIndicator step={step} totalSteps={totalSteps} />
-
+        <div className="flex-1 mt-6"></div>
         <Container
           totalSteps={totalSteps}
           step={step}
@@ -144,8 +176,6 @@ const Home = () => {
           formValues={formValues}
           formErrors={formErrors}
           setFormErrors={setFormErrors}
-          handleClick={handleClick}
-          handlePrev={handlePrev}
           isDragging={isDragging}
           setIsDragging={setIsDragging}
           inputRef={inputRef}
@@ -162,12 +192,11 @@ const Home = () => {
           setFormValues={setFormValues}
           dataSaveRemove={dataSaveRemove}
         />
-
         {step !== totalSteps - 1 && (
           <Footer
             step={step}
             totalSteps={totalSteps}
-            handleClick={handleClick}
+            handleClick={handleNext}
             handlePrev={handlePrev}
           />
         )}
@@ -175,4 +204,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;
